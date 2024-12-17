@@ -1,3 +1,4 @@
+// Check data connection and inspect data
 // queryUrl = "https://static.bc-edx.com/data/dl-1-2/m14/lms/starter/samples.json";
 // // d3.json(queryUrl).then((data)=> {
     // console.log(data);
@@ -7,7 +8,6 @@ function buildMetadata(sample_id) {
   // get the metadata field
   queryUrl = "https://static.bc-edx.com/data/dl-1-2/m14/lms/starter/samples.json";
   d3.json(queryUrl).then((data)=> {
-    //console.log(data);
     //get the metadata field;
     metaDataObject = data.metadata;
     
@@ -16,9 +16,7 @@ function buildMetadata(sample_id) {
       
       this_sample_id = metaDataObject[i].id;
       if (this_sample_id == sample_id){
-        //console.log("SAMPLE_ID: " ,this_sample_id);
-        
-        //console.log(this_matadata);
+
         let this_metadataObject = metaDataObject[i]
         
         // Use d3 to select the panel with id of `#sample-metadata`
@@ -27,16 +25,13 @@ function buildMetadata(sample_id) {
         // Use `.html("") to clear any existing metadata
         panel.html('');
         
-        let content = "";
         // use d3 to append new tags for each key-value 
+        let content = "";
         for (const [key, value] of Object.entries(this_metadataObject)){
-           //console.log(key, value);
-        // panel.html(`${key}: ${value}`);
-           content = content + key + ": " + value + "<br>"
-           //console.log(content);
-        // let content = "bob: 45<br>alice: 23<br>ted: 32<br>"
+          content = content + key + ": " + value + "<br>"
         }
         panel.html(`${content}`);
+        // exit loop when sample_id match is found
         break;
       }
     }
@@ -51,16 +46,13 @@ function buildCharts(sample_id) {
     sampleObject = data.samples;
 
     // Filter the samples for the object with the desired sample number
-    
     let otu_ids = [];
     let otu_labels = [];
     let sample_values = [];
-    
+
     for (let i = 0; i< sampleObject.length; i++){
-      
       this_sample_id = sampleObject[i].id;
       if (this_sample_id == sample_id){
-        //console.log(sampleObject);
         // Get the otu_ids, otu_labels, and sample_values
         otu_ids = sampleObject[i].otu_ids;
         otu_labels = sampleObject[i].otu_labels;
@@ -72,7 +64,7 @@ function buildCharts(sample_id) {
     const xArray = otu_ids;
     const yArray = sample_values;
     const labels = otu_labels;
-    //console.log(xArray);
+
     let size_values = sample_values.map(item => item * 0.8);
 
     const trace1 = {
@@ -92,7 +84,7 @@ function buildCharts(sample_id) {
     const data2 = [trace1];
 
     const layout = {
-      title: "Bubbles Bacteria Cultures Per Sample",
+      title: "Bacteria Cultures Per Sample",
       xaxis: {title: "OTU_ID"},
       yaxis: {title: "Number of Bacteria"}
     };
@@ -108,13 +100,13 @@ function buildCharts(sample_id) {
     }
    
     // Build a Bar Chart
-    // Don't forget to slice and reverse the input data appropriately
-    
-    // make a ditionary that links otu_id to sample_value, then sort by value
+    // make a dictionary that links otu_id to sample_value, then sort by value
     let value_by_id_dict = {};
     for(let i = 0; i < otu_ids.length; i++){
       value_by_id_dict[otu_ids[i]] = sample_values[i];
     }
+
+    // sort the dictoinary on value
     items = Object.keys(value_by_id_dict).map(
       (key) => { return [key, value_by_id_dict[key]] });
     
@@ -124,6 +116,7 @@ function buildCharts(sample_id) {
 
     let otu_ids_sorted_by_value = items.map( (e) => {return e[0]});
 
+    // construct plot elements
     let h_bar_x = [];
     let h_bar_y = [];
     let h_bar_y_tick_label = [];
@@ -134,7 +127,6 @@ function buildCharts(sample_id) {
       h_bar_x.push(this_otu_id);
       h_bar_y.push(value_by_id_dict[this_otu_id])
       h_bar_y_tick_label.push(this_otu_tick_label);
-      //console.log(`${k}: ${this_otu_id} ${value_by_id_dict[this_otu_id]}`);
     }
 
     // reverse the axis values to get required orientation
@@ -152,7 +144,6 @@ function buildCharts(sample_id) {
     const layout2 = {
       title: "Top Ten Bacteria Cultures Found",
       xaxis: {title: "Number of Bacteria"}
-      // yaxis: {title: "Number of Bacteria"}
     };
 
     // Render the Bar Chart
@@ -166,13 +157,11 @@ function init() {
 
     // Get the names field
     let namesObject = data.names;
-    //console.log(namesObject);
+
     // Use d3 to select the dropdown with id of `#selDataset`
     const dropdown = d3.select("#selDataset");
 
     // Use the list of sample names to populate the select options
-    // Hint: Inside a loop, you will need to use d3 to append a new
-    // option for each sample name.
     dropdown.selectAll('options')
       .data(namesObject)
       .enter()
@@ -181,8 +170,8 @@ function init() {
       .attr("value", d => d);
 
     // Get the first sample from the list
-
     let first_id = namesObject[0];
+
     // Build charts and metadata panel with the first sample
     buildMetadata(first_id);
     buildCharts(first_id);
@@ -195,13 +184,12 @@ function init() {
   buildCharts(dynamic_sample_id);
 };
 
-// Initialize the dashboard
-init();
-
-// Event Handler
 // Function for event listener
 dropdown.on("change", function(){
   const dynamic_sample_id = d3.select(this).property("value");
   console.log("dynamic_sample_id: ", dynamic_sample_id);
   optionChanged(dynamic_sample_id);
 });
+
+// Initialize the dashboard
+init();

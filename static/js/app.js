@@ -184,6 +184,9 @@ function init() {
   buildCharts(dynamic_sample_id);
 };
 
+// Initialize the dashboard
+init();
+
 // Function for event listener
 dropdown.on("change", function(){
   const dynamic_sample_id = d3.select(this).property("value");
@@ -191,5 +194,4 @@ dropdown.on("change", function(){
   optionChanged(dynamic_sample_id);
 });
 
-// Initialize the dashboard
-init();
+
